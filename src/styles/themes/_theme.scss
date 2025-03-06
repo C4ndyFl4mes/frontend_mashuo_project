@@ -16,14 +16,18 @@ $base-theme: (
 // Light theme
 $light-theme: (
     "primary-bg-color": var.$lith-primary-bg-color,
-    "primary-fg-color": var.$lith-primary-fg-color
+    "primary-fg-color": var.$lith-primary-fg-color,
+    "secondary-bg-color": var.$lith-secondary-bg-color,
+    "search-item-bg-color": var.$lith-search-item-bg-color
     // ...
 );
 
 // Dark theme
 $dark-theme: (
     "primary-bg-color": var.$dath-primary-bg-color,
-    "primary-fg-color": var.$dath-primary-fg-color
+    "primary-fg-color": var.$dath-primary-fg-color,
+    "secondary-bg-color": var.$dath-secondary-bg-color,
+    "search-item-bg-color": var.$dath-search-item-bg-color
     // ...
 );
 

@@ -13,12 +13,18 @@ $main-font-family: Arial, Helvetica, sans-serif;
 // Light Theme (lith)
 $lith-primary-bg-color: #fff;
 $lith-primary-fg-color: #000;
+$lith-secondary-bg-color: #4bf5e1;
+$lith-search-item-bg-color: color.adjust($lith-secondary-bg-color, $lightness: 15%);
 // ...
 
 // Dark Theme (dath)
-$dath-primary-bg-color: #000;
+$dath-primary-bg-color: #1E1E1E;
 $dath-primary-fg-color: #fff;
+$dath-secondary-bg-color: #26796F;
+$dath-search-item-bg-color: color.adjust($dath-secondary-bg-color, $lightness: -5%);
 // ...
+
+
 
 $link-normal-color: #00f;
 $link-active-color: color.adjust($link-normal-color, $lightness: -15%);

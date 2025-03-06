@@ -8,7 +8,11 @@
     font-family: var.$main-font-family;
 }
 
-
+%search-typography {
+    font-size: var.$main-font-size * 1.5;
+    line-height: var.$main-line-heigt;
+    font-family: var.$main-font-family;
+}
 // Links, using CSS variables because it may need to be able to change depending on theme.
 a {
     color: var(--link-normal);

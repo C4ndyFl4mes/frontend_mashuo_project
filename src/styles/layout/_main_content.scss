@@ -1,6 +1,7 @@
 // Main Content (main element)
 
-@use '../base/typography';
+@use "../base/typography";
+@use "../abstracts/variables" as var;
 
 main {
     width: 95%;
