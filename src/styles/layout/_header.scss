@@ -43,7 +43,7 @@ header {
 
 .search-results-grid-dropdown {
     position: absolute;
-    margin-top: -1px;
+
     width: 100%;
     display: grid;
     grid-template-rows: 0fr;
@@ -78,10 +78,10 @@ header {
         user-select: none;
         cursor: pointer;
 
-        display: grid;
-        grid-template-columns: auto auto;
-        grid-template-rows: auto auto;
-
+        // display: grid;
+        // grid-template-columns: 42px auto;
+        // grid-template-rows: auto auto;
+        column-gap: 1rem;
         transition: 0.2s filter;
     }
     li:hover {
@@ -89,12 +89,16 @@ header {
     }
     p {
         margin: 0;
+        padding: 0;
+        font-size: 0.8rem;
     }
     .search-image {
-        grid-area: 1/1/3/2;
+        float: left;
+        margin-right: 0.5rem;
     }
     .search-title {
-        grid-area: 1/2/2/3;
+        font-weight: 700;
+        
     }
     .search-premiere {
         grid-area: 2/2/3/3;
