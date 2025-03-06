@@ -1,0 +1,12 @@
+{
+    "jpeg": {
+        "quality": 75
+    },
+    "avif": {
+        "quality": 30
+    },
+    "png": {
+        "quality": 90,
+        "palette": true
+    }
+}

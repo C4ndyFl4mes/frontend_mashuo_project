@@ -1,0 +1,27 @@
+// Variables
+
+@use 'sass:color';
+
+// Typography
+$main-font-size: 1rem;
+$main-line-heigt: 1.4rem;
+$main-font-family: Arial, Helvetica, sans-serif;
+// ...
+
+
+// Colors
+// Light Theme (lith)
+$lith-primary-bg-color: #fff;
+$lith-primary-fg-color: #000;
+// ...
+
+// Dark Theme (dath)
+$dath-primary-bg-color: #000;
+$dath-primary-fg-color: #fff;
+// ...
+
+$link-normal-color: #00f;
+$link-active-color: color.adjust($link-normal-color, $lightness: -15%);
+$link-visited-color: color.adjust($link-normal-color, $lightness: -30%);
+
+

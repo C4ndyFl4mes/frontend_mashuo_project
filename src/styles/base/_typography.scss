@@ -1,0 +1,23 @@
+// Typography and links
+@use "../abstracts/variables" as var;
+
+// May be changed or added more typos. Standard on body element.
+%main-typography {
+    font-size: var.$main-font-size;
+    line-height: var.$main-line-heigt;
+    font-family: var.$main-font-family;
+}
+
+
+// Links, using CSS variables because it may need to be able to change depending on theme.
+a {
+    color: var(--link-normal);
+}
+
+a:visited {
+    color: var(--link-visited);
+}
+
+a:active {
+    color: var(--link-active);
+}

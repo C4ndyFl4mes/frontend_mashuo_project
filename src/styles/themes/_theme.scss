@@ -1,0 +1,60 @@
+// Default themes dark and light.
+
+@use "../abstracts/variables" as var;
+@use "sass:map";
+
+// Themes definition
+
+// Shared values for themes, mostly placeholder as template.
+$base-theme: (
+    "link-normal": var.$link-normal-color,
+    "link-visited": var.$link-visited-color,
+    "link-active": var.$link-active-color
+    // ...
+);
+
+// Light theme
+$light-theme: (
+    "primary-bg-color": var.$lith-primary-bg-color,
+    "primary-fg-color": var.$lith-primary-fg-color
+    // ...
+);
+
+// Dark theme
+$dark-theme: (
+    "primary-bg-color": var.$dath-primary-bg-color,
+    "primary-fg-color": var.$dath-primary-fg-color
+    // ...
+);
+
+// A function to merge base with light or dark theme.
+@function deep-merge($map1, $map2) {
+    $result: $map1;
+
+    @each $key, $value in $map2 {
+        $result: map.set($result, $key, $value);
+    }
+
+    @return $result;
+}
+
+// Merge them base theme with the other themes.
+$light-theme: deep-merge($base-theme, $light-theme);
+$dark-theme: deep-merge($base-theme, $dark-theme);
+
+
+// Light (standard)
+:root {
+    @each $key, $value in $light-theme {
+        --#{$key}: #{$value};
+    }
+}
+
+// Dark if prefered, overrides light theme
+@media (prefers-color-scheme: dark) {
+    :root {
+        @each $key, $value in $dark-theme {
+            --#{$key}: #{$value};
+        }
+    }
+}
