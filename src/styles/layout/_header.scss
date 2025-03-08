@@ -171,6 +171,9 @@ nav {
 @media screen and (max-width: 412px) {
     nav>ul {
         flex-direction: column;
+        li {
+            white-space: wrap;
+        }
         li:last-child {
             border-radius: 0;
         }

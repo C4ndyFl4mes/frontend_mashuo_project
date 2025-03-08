@@ -26,6 +26,83 @@ function selectTab(tabsEL, tabEL, tab) {
     });
     tabEL.className = "tab selected";
     console.log(tab);
+    
+    renderPage(tab);
+}
+
+function renderPage(tab) {
+    const pageTitle = document.getElementById("page-title");
+    const pageHeader = document.createElement("h1");
+    pageTitle.textContent = tab.title;
+    pageHeader.textContent = tab.title;
+    main.innerHTML = "";
+    if (tab.pagetype !== "home_page") {
+        const animeBanner = document.createElement("div");
+        animeBanner.className = "anime-banner";
+        animeBanner.innerHTML = `
+        <picture class=page-image>
+            <source srcset="${tab.images.webp.image_url}" type="image/webp">
+            <source srcset="${tab.images.jpg.image_url}" type="image/jpeg">
+
+            <img src="${tab.images.jpg.image_url}" 
+            width="425" height="600"
+            alt="Descriptive alt text here" 
+            loading="lazy" 
+            decoding="async"
+            class=page-image>
+        </picture>
+        <ul class=anime-info-in-banner>
+            <li><span>Score</span> <strong>${tab.score}</strong></li>
+            <li><span>Rank</span> <strong>#${tab.rank}</strong></li>
+            <li><span>Premiered</span> <strong>${tab.premiered}</strong></li>
+            <li><span>Type</span> <strong>${tab.type}</strong></li>
+            <li><span>Episodes</span> <strong>${tab.episodes}</strong></li>
+        </ul>
+        <ul class=anime-extra-info-in-banner>
+            <li><span>Rating</span> <strong>${tab.rating}</strong></li>
+            <li><span>Aired</span> <strong>${tab.aired.string}</strong></li>
+        </ul>
+
+        `;
+        
+        const genThemeDemos = [];
+        if (tab.genres) {
+            tab.genres.forEach(genre => {
+                genThemeDemos.push(genre.name);
+            });
+        }
+        if (tab.themes) {
+            tab.themes.forEach(theme => {
+                genThemeDemos.push(theme.name);
+            });
+        }
+        if (tab.demo) {
+            tab.demo.forEach(demo => {
+                genThemeDemos.push(demo.name);
+            });
+        }
+        const genresUL = document.createElement("ul");
+        genresUL.className = "genres-list";
+        genThemeDemos.forEach(gtd => {
+            const gtdLI = document.createElement("li");
+           
+            gtdLI.innerHTML = `<strong>${gtd}</strong>`;
+            genresUL.appendChild(gtdLI);
+        });
+        main.appendChild(animeBanner);
+        main.appendChild(pageHeader);
+        main.appendChild(genresUL);
+        
+        const descriptionARTICLE = document.createElement("article");
+        descriptionARTICLE.className = "synopsis";
+        descriptionARTICLE.innerHTML = `<h2>Synopsis</h2><p>${tab.synopsis}</p>`;
+        main.appendChild(descriptionARTICLE);
+
+    } else {
+        main.appendChild(pageHeader);
+
+    }
+
 }
 
 /**
@@ -61,17 +138,20 @@ function renderTabs(tabs, malID) {
     homeTab.textContent = "Home";
     tabsEL.push(homeTab);
     tabsUL.appendChild(homeTab);
-
+    const tabcontent = {
+        pagetype: "home_page",
+        title: "Home"
+    };
     homeTab.addEventListener("click", () => {
-
-        selectTab(tabsEL, homeTab);
+       
+        selectTab(tabsEL, homeTab, tabcontent);
     });
     if (tabs) {
         tabs.forEach(tab => {
             const tabLI = document.createElement("li");
             tabLI.className = "tab selected";
             const tabSPAN = document.createElement("span");
-            tabSPAN.textContent = tab.title_english || tab.title;
+            tabSPAN.textContent = tab.title;
             const tabRemoveBTN = document.createElement("button");
             tabRemoveBTN.innerHTML = `<svg class=removetab-svg width="25px" height="25px" viewBox="0 0 36 36">
         <path d="M18,2A16,16,0,1,0,34,18,16,16,0,0,0,18,2Zm8,22.1a1.4,1.4,0,0,1-2,2l-6-6L12,26.12a1.4,1.4,0,1,1-2-2L16,18.08,9.83,11.86a1.4,1.4,0,1,1,2-2L18,16.1l6.17-6.17a1.4,1.4,0,1,1,2,2L20,18.08Z"></path>
@@ -98,7 +178,7 @@ function renderTabs(tabs, malID) {
             selectTab(tabsEL, tabsEL[tabsEL.length - 1], tabs[tabs.length - 1]);
         }
     } else {
-        selectTab(tabsEL, homeTab);
+        selectTab(tabsEL, homeTab, tabcontent);
     }
 }
 /**
@@ -128,7 +208,38 @@ async function searchAnime() {
     try {
         const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&limit=5`);
         const data = await resp.json();
-        renderSearchResults(data.data);
+        const animes = [];
+        data.data.forEach(anime => {
+            // console.log(anime);
+            let season = anime.season;
+            if(anime.season) {
+                season = anime.season.charAt(0).toUpperCase() + anime.season.slice(1);
+            }
+            animes.push({
+                pagetype: "anime_page",
+                title: anime.title_english || anime.title,
+                mal_id: anime.mal_id,
+                premiered: `${season || "?"} ${anime.year || "?"}`,
+                images: anime.images,
+                genres: anime.genres,
+                themes: anime.themes,
+                explicit_genres: anime.explicit_genres,
+                demo: anime.demographics,
+                licensors: anime.licensors,
+                producers: anime.producers,
+                studios: anime.studios,
+                source: anime.source,
+                synopsis: anime.synopsis,
+                score: anime.score,
+                rank: anime.rank,
+                type: anime.type,
+                rating: anime.rating,
+                aired: anime.aired,
+                episodes: anime.episodes
+            });
+        });
+        
+        renderSearchResults(animes);
     } catch (error) {
         console.error(error);
     }
@@ -148,8 +259,8 @@ function renderSearchResults(animes) {
                 <source srcset="${anime.images.webp.small_image_url}" type="image/webp">
                 <img src="${anime.images.jpg.small_image_url}" width="46" height="65" alt="" loading="lazy" class=search-image>
             </picture>
-            <p class=search-title>${anime.title_english || anime.title}</p>
-            <p class=search-premiere>Premiered: ${anime.season || "?"} ${anime.year || "?"}</p>
+            <p class=search-title>${anime.title}</p>
+            <p class=search-premiere>Premiered: ${anime.premiered}</p>
         `;
         listItem.addEventListener("click", () => {
             listItem.blur();

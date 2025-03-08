@@ -4,10 +4,134 @@
 @use "../abstracts/variables" as var;
 
 main {
-    width: 95%;
-    max-width: 1200px;
-
+    width: 97%;
+    max-width: 1000px;
+    background-color: var(--anime-info-banner-bg-color);
+    padding-top: 1rem;
+    // padding: 1rem;
+    // padding-right: 0;
     margin: 0 auto;
-
+    display: flex;
+    flex-direction: column;
+ 
+    border: 5px solid var(--secondary-bg-color);
     @extend %main-typography;
+    h1 {
+        padding-left: 1rem;
+        font-size: 1.7rem;
+        line-height: 2rem;
+    }
+}
+.anime-banner {
+    height: fit-content;
+    padding-left: 1rem;
+    display: grid;
+    grid-template-columns: auto auto;
+    grid-template-rows: auto auto;
+}
+.page-image {
+    width: 100%;
+    max-width: 225px;
+    height: auto;
+    padding-right: 1rem;
+    grid-area: 1/1/3/2;
+    float: left;
+}
+.anime-info-in-banner {
+    align-self: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    li {
+        flex: 1;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+}
+.anime-extra-info-in-banner {
+    align-self: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+
+    li {
+        flex: 1;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+.synopsis {
+    font-size: 1.2rem;
+    line-height: 1.5rem;
+    padding: 1rem;
+    // padding-right: 1rem;
+    h2 {
+        font-size: 1.4rem;
+        line-height: 1.8rem;
+        margin-bottom: 0.3rem;
+    }
+    p {
+        margin-top: 0;
+        text-align: justify;
+    }
+}
+.genres-list {
+    width: 100%;
+
+    align-self: center;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background-color: var(--secondary-bg-color);
+
+    display: flex;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+
+    li {
+        flex: 1;
+        padding-left: 1rem;
+        padding-right: 1rem;
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    main {
+        width: 100%;
+        border-left: 0;
+        border-right: 0;
+    }
+    .page-image {
+        max-width: 200px;
+        padding-right: 0;
+        float: none;
+    }
+    .anime-info-in-banner {
+        flex-direction: column;
+        li {
+            text-align: right;
+        }
+    }
+    .anime-extra-info-in-banner  {
+        display: none;
+    }
+    .genres-list {
+        display: flex;
+    }
 }
