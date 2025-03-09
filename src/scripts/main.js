@@ -98,11 +98,61 @@ function renderPage(tab) {
         descriptionARTICLE.innerHTML = `<h2>Synopsis</h2><p>${tab.synopsis}</p>`;
         main.appendChild(descriptionARTICLE);
 
+        const moreInfoUL = document.createElement("ul");
+        moreInfoUL.className = "more-info-list";
+        
+        moreInfoUL.innerHTML = `
+            <li><span>Source</span><strong>${tab.source}</strong></li>
+            <li class=show-on-mobile><span>Rating</span><strong>${tab.rating}</strong></li>
+            <li class=show-on-mobile><span>Aired</span><strong>${tab.aired.string}</strong></li>
+        `;
+
+        moreInfoUL.appendChild(moreInfoListItem("Studio", tab.studios));
+        moreInfoUL.appendChild(moreInfoListItem("Licensor", tab.licensors));
+        moreInfoUL.appendChild(moreInfoListItem("Producer", tab.producers));
+
+
+            
+        main.appendChild(moreInfoUL);
     } else {
         main.appendChild(pageHeader);
 
     }
 
+}
+
+/**
+ * Räknar upp t.ex. producers i en enda li-element.
+ * @param {string} type - Namnet på vad det är för typ av information som ska räknas upp.
+ * @param {array} names - En array av objekt.
+ * @returns Ett li-element.
+ */
+function moreInfoListItem(type, names) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    const strong = document.createElement("strong");
+    // Ändrar hur uppräkningen ska se ut beroende på ifall det är 0, 1 eller flera, vid flera läggs det till ", and" innan sista delen av uppräkningen.
+    if (names.length > 1) {
+        span.textContent = `${type}s (${names.length})`;
+        for(let i = 0; i <= names.length - 1; i++) {
+            if (i == 0) {
+                strong.textContent = names[i].name;
+            } else if (i == names.length - 1) {
+                strong.textContent += `, and ${names[i].name}.`;
+            } else {
+                 strong.textContent += `, ${names[i].name}`;
+            }
+        }
+    } else if(names.length == 0) {
+        span.textContent = type;
+        strong.textContent = "?";
+    } else {
+        span.textContent = type;
+        strong.textContent = names[0].name;
+    }
+    li.appendChild(span);
+    li.appendChild(strong);
+    return li;
 }
 
 /**
@@ -223,7 +273,6 @@ async function searchAnime() {
                 images: anime.images,
                 genres: anime.genres,
                 themes: anime.themes,
-                explicit_genres: anime.explicit_genres,
                 demo: anime.demographics,
                 licensors: anime.licensors,
                 producers: anime.producers,

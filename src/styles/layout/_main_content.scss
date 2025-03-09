@@ -13,7 +13,7 @@ main {
     margin: 0 auto;
     display: flex;
     flex-direction: column;
- 
+
     border: 5px solid var(--secondary-bg-color);
     @extend %main-typography;
     h1 {
@@ -22,6 +22,7 @@ main {
         line-height: 2rem;
     }
 }
+
 .anime-banner {
     height: fit-content;
     padding-left: 1rem;
@@ -29,6 +30,7 @@ main {
     grid-template-columns: auto auto;
     grid-template-rows: auto auto;
 }
+
 .page-image {
     width: 100%;
     max-width: 225px;
@@ -37,34 +39,21 @@ main {
     grid-area: 1/1/3/2;
     float: left;
 }
-.anime-info-in-banner {
+
+%list {
     align-self: center;
     list-style: none;
     margin: 0;
     padding: 0;
 
     display: flex;
-    justify-content: space-evenly;
     flex-wrap: wrap;
-    li {
-        flex: 1;
-        padding-left: 1rem;
-        padding-right: 1rem;
-        text-align: center;
-        display: flex;
-        flex-direction: column;
-    }
 }
+
+.anime-info-in-banner,
 .anime-extra-info-in-banner {
-    align-self: center;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-
-    display: flex;
+    @extend %list;
     justify-content: space-evenly;
-    flex-wrap: wrap;
-
     li {
         flex: 1;
         padding-left: 1rem;
@@ -79,7 +68,6 @@ main {
     font-size: 1.2rem;
     line-height: 1.5rem;
     padding: 1rem;
-    // padding-right: 1rem;
     h2 {
         font-size: 1.4rem;
         line-height: 1.8rem;
@@ -90,18 +78,14 @@ main {
         text-align: justify;
     }
 }
+
 .genres-list {
     width: 100%;
+    @extend %list;
 
-    align-self: center;
-    list-style: none;
-    margin: 0;
-    padding: 0;
     background-color: var(--secondary-bg-color);
 
-    display: flex;
     justify-content: space-evenly;
-    flex-wrap: wrap;
 
     li {
         flex: 1;
@@ -111,27 +95,56 @@ main {
     }
 }
 
+.more-info-list {
+    width: 100%;
+    @extend %list;
+
+    justify-content: space-between;
+    row-gap: 1rem;
+    li {
+        padding-left: 1rem;
+        padding-right: 1rem;
+
+        display: flex;
+        flex-direction: column;
+    }
+    .show-on-mobile {
+        display: none;
+    }
+}
+
 @media screen and (max-width: 500px) {
     main {
         width: 100%;
         border-left: 0;
         border-right: 0;
     }
+
     .page-image {
         max-width: 200px;
         padding-right: 0;
         float: none;
     }
+
     .anime-info-in-banner {
         flex-direction: column;
         li {
             text-align: right;
         }
     }
-    .anime-extra-info-in-banner  {
+
+    .anime-extra-info-in-banner {
         display: none;
     }
+
     .genres-list {
         display: flex;
+    }
+    
+    .more-info-list {
+        flex-direction: column;
+        .show-on-mobile {
+            display: flex;
+        }
     }
 }
