@@ -26,7 +26,7 @@ function selectTab(tabsEL, tabEL, tab) {
     });
     tabEL.className = "tab selected";
     console.log(tab);
-    
+
     renderPage(tab);
 }
 
@@ -43,10 +43,9 @@ function renderPage(tab) {
         <picture class=page-image>
             <source srcset="${tab.images.webp.image_url}" type="image/webp">
             <source srcset="${tab.images.jpg.image_url}" type="image/jpeg">
-
             <img src="${tab.images.jpg.image_url}" 
             width="425" height="600"
-            alt="Descriptive alt text here" 
+            alt="" 
             loading="lazy" 
             decoding="async"
             class=page-image>
@@ -64,7 +63,7 @@ function renderPage(tab) {
         </ul>
 
         `;
-        
+
         const genThemeDemos = [];
         if (tab.genres) {
             tab.genres.forEach(genre => {
@@ -85,14 +84,14 @@ function renderPage(tab) {
         genresUL.className = "genres-list";
         genThemeDemos.forEach(gtd => {
             const gtdLI = document.createElement("li");
-           
+
             gtdLI.innerHTML = `<strong>${gtd}</strong>`;
             genresUL.appendChild(gtdLI);
         });
         main.appendChild(animeBanner);
         main.appendChild(pageHeader);
         main.appendChild(genresUL);
-        
+
         const descriptionARTICLE = document.createElement("article");
         descriptionARTICLE.className = "synopsis";
         descriptionARTICLE.innerHTML = `<h2>Synopsis</h2><p>${tab.synopsis}</p>`;
@@ -100,7 +99,7 @@ function renderPage(tab) {
 
         const moreInfoUL = document.createElement("ul");
         moreInfoUL.className = "more-info-list";
-        
+
         moreInfoUL.innerHTML = `
             <li><span>Source</span><strong>${tab.source}</strong></li>
             <li class=show-on-mobile><span>Rating</span><strong>${tab.rating}</strong></li>
@@ -112,8 +111,10 @@ function renderPage(tab) {
         moreInfoUL.appendChild(moreInfoListItem("Producer", tab.producers));
 
 
-            
+
         main.appendChild(moreInfoUL);
+
+        renderAnimeTrailer(tab.originalTitle, tab.title);
     } else {
         main.appendChild(pageHeader);
 
@@ -134,16 +135,16 @@ function moreInfoListItem(type, names) {
     // Ändrar hur uppräkningen ska se ut beroende på ifall det är 0, 1 eller flera, vid flera läggs det till ", and" innan sista delen av uppräkningen.
     if (names.length > 1) {
         span.textContent = `${type}s (${names.length})`;
-        for(let i = 0; i <= names.length - 1; i++) {
+        for (let i = 0; i <= names.length - 1; i++) {
             if (i == 0) {
                 strong.textContent = names[i].name;
             } else if (i == names.length - 1) {
                 strong.textContent += `, and ${names[i].name}.`;
             } else {
-                 strong.textContent += `, ${names[i].name}`;
+                strong.textContent += `, ${names[i].name}`;
             }
         }
-    } else if(names.length == 0) {
+    } else if (names.length == 0) {
         span.textContent = type;
         strong.textContent = "?";
     } else {
@@ -153,6 +154,53 @@ function moreInfoListItem(type, names) {
     li.appendChild(span);
     li.appendChild(strong);
     return li;
+}
+
+async function renderAnimeTrailer(title, visualTitle) {
+    try {
+        console.log(title);
+        const resp = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${process.env.THE_MOVIE_DATABASE}&query=${encodeURIComponent(title)}`)
+        const searchData = await resp.json();
+
+        if (searchData.results.length > 0) {
+            const firstResultID = searchData.results[0].id;
+            try {
+                const videoResp = await fetch(`https://api.themoviedb.org/3/tv/${firstResultID}/videos?api_key=${process.env.THE_MOVIE_DATABASE}`)
+                const videoData = await videoResp.json();
+                const youtubeTrailers = videoData.results.filter(video => video.site === "YouTube" && video.type === "Trailer");
+                console.log(youtubeTrailers);
+                if (youtubeTrailers.length > 0) {
+                    const youtubeTrailer = youtubeTrailers[0].key;
+                    const trailerDIV = document.createElement("div");
+                    trailerDIV.className = "trailer-div";
+                    trailerDIV.innerHTML = `
+                        <h2>${visualTitle} - Trailer</h2>
+                        <iframe width="1000" height="562.5" class=youtube-trailer
+                            src="https://www.youtube.com/embed/${youtubeTrailer}"
+                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                        </iframe>`;
+                    main.appendChild(trailerDIV);
+                } else {
+                    const trailerDIV = document.createElement("div");
+                    trailerDIV.className = "no-trailer-found";
+                    trailerDIV.innerHTML = `<p>No trailers were found for <strong>${visualTitle}</strong></p>`;
+                    main.appendChild(trailerDIV);
+                    console.log("No YouTube-trailers were found!");
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            const trailerDIV = document.createElement("div");
+            trailerDIV.className = "no-trailer-found";
+            trailerDIV.innerHTML = `<p>No trailers were found for <strong>${visualTitle}</strong></p>`;
+            main.appendChild(trailerDIV);
+            console.log("No trailers were found!");
+        }
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 /**
@@ -193,7 +241,7 @@ function renderTabs(tabs, malID) {
         title: "Home"
     };
     homeTab.addEventListener("click", () => {
-       
+
         selectTab(tabsEL, homeTab, tabcontent);
     });
     if (tabs) {
@@ -262,7 +310,7 @@ async function searchAnime() {
         data.data.forEach(anime => {
             // console.log(anime);
             let season = anime.season;
-            if(anime.season) {
+            if (anime.season) {
                 season = anime.season.charAt(0).toUpperCase() + anime.season.slice(1);
             }
             animes.push({
@@ -284,10 +332,11 @@ async function searchAnime() {
                 type: anime.type,
                 rating: anime.rating,
                 aired: anime.aired,
-                episodes: anime.episodes
+                episodes: anime.episodes,
+                originalTitle: anime.title
             });
         });
-        
+
         renderSearchResults(animes);
     } catch (error) {
         console.error(error);

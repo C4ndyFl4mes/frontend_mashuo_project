@@ -104,7 +104,6 @@ main {
     li {
         padding-left: 1rem;
         padding-right: 1rem;
-
         display: flex;
         flex-direction: column;
     }
@@ -112,7 +111,24 @@ main {
         display: none;
     }
 }
-
+.trailer-div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+.youtube-trailer {
+    aspect-ratio: 560/315;
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+}
+.no-trailer-found {
+    margin-top: 2rem;
+    background-color: red;
+    text-align: center;
+}
 @media screen and (max-width: 500px) {
     main {
         width: 100%;
