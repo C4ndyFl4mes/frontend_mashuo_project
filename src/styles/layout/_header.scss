@@ -6,6 +6,7 @@ header {
     @extend %main-typography;
     display: flex;
     flex-direction: column;
+    margin-bottom: 5rem;
 }
 
 .top {
@@ -168,7 +169,19 @@ nav {
     }
 }
 
-@media screen and (max-width: 412px) {
+.header-image-frame {
+    margin: 0 auto;
+    max-width: 1000px;
+    border: 5px solid var(--secondary-bg-color);
+    border-bottom: 0;
+    background-color: var(--secondary-bg-color);
+}
+.header-image {
+    width: 100%;
+    height: 100%;
+}
+
+@media screen and (max-width: 500px) {
     nav>ul {
         flex-direction: column;
         li {
@@ -188,5 +201,9 @@ nav {
     // }
     #search-field {
         min-width: auto;
+    }
+    .header-image-frame {
+        border-left: 0;
+        border-right: 0;
     }
 }
