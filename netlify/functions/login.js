@@ -6,7 +6,7 @@ const crypto = require("crypto");
  */
 exports.handler = async () => {
   const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
-  const REDIRECT_URI = "http://localhost:8888/callback";
+  const REDIRECT_URI = "https://fr0ntendpr0ject.netlify.app/callback";
   const SCOPES = [
       "user-read-playback-state",
       "user-modify-playback-state",
