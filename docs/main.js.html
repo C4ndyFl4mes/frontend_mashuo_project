@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: main.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: main.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const searchField = document.getElementById("search-field");
+const searchResults = document.getElementById("search-results");
+const tabsUL = document.getElementById("tabs");
+const main = document.getElementById("main");
+let debounceTimer;
+
+window.addEventListener("load", () => {
+    searchAnime();
+    renderTabs();
+    if (sessionStorage.getItem("tabs")) {
+        const tabs = JSON.parse(sessionStorage.getItem("tabs"));
+        renderTabs(tabs);
+    }
+    // Hämta token från url.
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = params.get("access_token");
+
+    if (accessToken) {
+        sessionStorage.setItem("spotify_access_token", accessToken);
+        window.location.href = "/";
+    }
+});
+
+searchField.addEventListener("input", () => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(searchAnime, 500);
+});
+
+
+/**
+ * Visuellt uppdaterar utseendet vid val av flik, samt kallar på renderPage(tab) för att visa flikens innehåll. 
+ * @param {array} tabsEL - en array av element.
+ * @param {HTMLElement} tabEL - elementet som är vald.
+ * @param {object} tab - information som ska visas på sidan.
+ */
+function selectTab(tabsEL, tabEL, tab) {
+    tabsEL.forEach(tabEL => {
+        tabEL.className = "tab";
+    });
+    tabEL.className = "tab selected";
+    console.log(tab);
+
+    renderPage(tab);
+}
+
+/**
+ * Den bygger upp sidan utefter vilket sätt är lämpligast och så smidigt som möjligt. Därför använder funktionen både innerHTML och DOM-manipulation.
+ * @param {object} tab - information om den valda sidan.
+ */
+async function renderPage(tab) {
+    const pageTitle = document.getElementById("page-title");
+    const pageHeader = document.createElement("h1");
+    pageTitle.textContent = tab.title;
+    pageHeader.textContent = tab.title;
+    main.innerHTML = "";
+    if (tab.pagetype !== "home_page") {
+        const animeBanner = document.createElement("div");
+        animeBanner.className = "anime-banner";
+        animeBanner.innerHTML = `
+        &lt;picture class=page-image>
+            &lt;source srcset="${tab.images.webp.image_url}" type="image/webp">
+            &lt;source srcset="${tab.images.jpg.image_url}" type="image/jpeg">
+            &lt;img src="${tab.images.jpg.image_url}" 
+            width="425" height="600"
+            alt="" 
+            loading="lazy" 
+            decoding="async"
+            class=page-image>
+        &lt;/picture>
+        &lt;ul class=anime-info-in-banner>
+            &lt;li>&lt;span>Score&lt;/span> &lt;strong>${tab.score}&lt;/strong>&lt;/li>
+            &lt;li>&lt;span>Rank&lt;/span> &lt;strong>#${tab.rank}&lt;/strong>&lt;/li>
+            &lt;li>&lt;span>Premiered&lt;/span> &lt;strong>${tab.premiered}&lt;/strong>&lt;/li>
+            &lt;li>&lt;span>Type&lt;/span> &lt;strong>${tab.type}&lt;/strong>&lt;/li>
+            &lt;li>&lt;span>Episodes&lt;/span> &lt;strong>${tab.episodes}&lt;/strong>&lt;/li>
+        &lt;/ul>
+        &lt;ul class=anime-extra-info-in-banner>
+            &lt;li>&lt;span>Rating&lt;/span> &lt;strong>${tab.rating}&lt;/strong>&lt;/li>
+            &lt;li>&lt;span>Aired&lt;/span> &lt;strong>${tab.aired.string}&lt;/strong>&lt;/li>
+        &lt;/ul>`;
+
+        // Lägger ihop tre arrayer till en gemensam array.
+        const genThemeDemos = [];
+        if (tab.genres) {
+            tab.genres.forEach(genre => {
+                genThemeDemos.push(genre.name);
+            });
+        }
+        if (tab.themes) {
+            tab.themes.forEach(theme => {
+                genThemeDemos.push(theme.name);
+            });
+        }
+        if (tab.demo) {
+            tab.demo.forEach(demo => {
+                genThemeDemos.push(demo.name);
+            });
+        }
+
+        // Lägger hela arrayen i en lista.
+        const genresUL = document.createElement("ul");
+        genresUL.className = "genres-list";
+        genThemeDemos.forEach(gtd => {
+            const gtdLI = document.createElement("li");
+
+            gtdLI.innerHTML = `&lt;strong>${gtd}&lt;/strong>`;
+            genresUL.appendChild(gtdLI);
+        });
+
+        main.appendChild(animeBanner);
+        main.appendChild(pageHeader);
+        main.appendChild(genresUL);
+
+        // Beskrivningen.
+        const descriptionARTICLE = document.createElement("article");
+        descriptionARTICLE.className = "synopsis";
+        descriptionARTICLE.innerHTML = `&lt;h2>Synopsis&lt;/h2>&lt;p>${tab.synopsis}&lt;/p>`;
+        main.appendChild(descriptionARTICLE);
+
+        // Mer informationslistan.
+        const moreInfoUL = document.createElement("ul");
+        moreInfoUL.className = "more-info-list";
+
+        moreInfoUL.innerHTML = `
+            &lt;li>&lt;span>Source&lt;/span>&lt;strong>${tab.source}&lt;/strong>&lt;/li>
+            &lt;li class=show-on-mobile>&lt;span>Rating&lt;/span>&lt;strong>${tab.rating}&lt;/strong>&lt;/li>
+            &lt;li class=show-on-mobile>&lt;span>Aired&lt;/span>&lt;strong>${tab.aired.string}&lt;/strong>&lt;/li>
+        `;
+
+        // Lägger in information som kan variera i längd.
+        moreInfoUL.appendChild(moreInfoListItem("Studio", tab.studios));
+        moreInfoUL.appendChild(moreInfoListItem("Licensor", tab.licensors));
+        moreInfoUL.appendChild(moreInfoListItem("Producer", tab.producers));
+
+        main.appendChild(moreInfoUL);
+
+        // Renderar en anime trailer ifall det finns en.
+        await renderAnimeTrailer(tab.originalTitle, tab.title);
+
+        // Kollar ifall användaren har loggat in med spotify.
+        if (sessionStorage.getItem("spotify_access_token")) {
+            const spotifyPlayerDIV = document.createElement("div");
+            spotifyPlayerDIV.id = "spotifyPlayer";
+            main.appendChild(spotifyPlayerDIV);
+            playTrack(tab.originalTitle); // Söker på orginal titel istället för den engelska för att öka chansen på att hitta relevant OP.
+        } else {
+            const authDIV = document.createElement("div");
+            authDIV.className = "auth-div";
+            authDIV.innerHTML = `&lt;label for=auth-btn>You have to authenticate with Spotify to play OP&lt;/label>
+            &lt;button id=auth-btn>Authenticate&lt;/button>`;
+            main.appendChild(authDIV);
+            document.getElementById("auth-btn").addEventListener('click', () => {
+                window.location.href = "/.netlify/functions/login"; // Startar authentiseringsprocessen.
+            });
+        }
+    } else {
+        main.appendChild(pageHeader);
+
+    }
+}
+
+/**
+ * Hämtar och beddar in spotify spelaren efter den sökta titeln.
+ * @param {string} animeTitle - orginal titeln.
+ */
+async function playTrack(animeTitle) {
+    try {
+        const resp = await fetch(`https://api.spotify.com/v1/search?q=${animeTitle}&amp;type=track`, {
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('spotify_access_token')}` }
+        });
+        const data = await resp.json();
+        const track = data.tracks.items[0];
+
+        document.getElementById("spotifyPlayer").innerHTML = `
+        &lt;h3>${track.name} - ${track.artists[0].name}&lt;/h3>
+        &lt;iframe src="https://open.spotify.com/embed/track/${track.id}" width="300" height="80" frameborder="0" class=spotify-player allow="encrypted-media">&lt;/iframe>
+    `;
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/**
+ * Räknar upp t.ex. producers i en enda li-element.
+ * @param {string} type - Namnet på vad det är för typ av information som ska räknas upp.
+ * @param {array} names - En array av objekt.
+ * @returns Ett li-element.
+ */
+function moreInfoListItem(type, names) {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    const strong = document.createElement("strong");
+    // Ändrar hur uppräkningen ska se ut beroende på ifall det är 0, 1 eller flera, vid flera läggs det till ", and" innan sista delen av uppräkningen.
+    if (names.length > 1) {
+        span.textContent = `${type}s (${names.length})`;
+        for (let i = 0; i &lt;= names.length - 1; i++) {
+            if (i == 0) {
+                strong.textContent = names[i].name;
+            } else if (2 == names.length &amp;&amp; i == names.length - 1) {
+                strong.textContent += ` and ${names[i].name}.`;
+            } else if (i == names.length - 1) {
+                strong.textContent += `, and ${names[i].name}.`;
+            } else {
+                strong.textContent += `, ${names[i].name}`;
+            }
+        }
+    } else if (names.length == 0) {
+        span.textContent = type;
+        strong.textContent = "?";
+    } else {
+        span.textContent = type;
+        strong.textContent = names[0].name;
+    }
+    li.appendChild(span);
+    li.appendChild(strong);
+    return li;
+}
+
+/**
+ * Hämtar och laddar upp beddar in YouTube trailer efter sökt titel.
+ * @param {string} title - original titeln.
+ * @param {string} visualTitle - engelska titeln.
+ */
+async function renderAnimeTrailer(title, visualTitle) {
+    try {
+        console.log(title);
+        const resp = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${process.env.THE_MOVIE_DATABASE}&amp;query=${encodeURIComponent(title)}`)
+        const searchData = await resp.json();
+
+        // Kollar ifall titeln finns.
+        if (searchData.results.length > 0) {
+            const firstResultID = searchData.results[0].id;
+            // Om det gör det hämtas video trailers av den och filterars efter att vara trailer på YouTube.
+            try {
+                const videoResp = await fetch(`https://api.themoviedb.org/3/tv/${firstResultID}/videos?api_key=${process.env.THE_MOVIE_DATABASE}`)
+                const videoData = await videoResp.json();
+                const youtubeTrailers = videoData.results.filter(video => video.site === "YouTube" &amp;&amp; video.type === "Trailer");
+                console.log(youtubeTrailers);
+                // Kolla ifall det finns trailers.
+                if (youtubeTrailers.length > 0) {
+                    // Om det gör det beddas den in på sidan, med rubriken på engelska.
+                    const youtubeTrailer = youtubeTrailers[0].key;
+                    const trailerDIV = document.createElement("div");
+                    trailerDIV.className = "trailer-div";
+                    trailerDIV.innerHTML = `
+                        &lt;h2>${visualTitle} - Trailer&lt;/h2>
+                        &lt;iframe width="1000" height="563" class=youtube-trailer
+                            src="https://www.youtube.com/embed/${youtubeTrailer}"
+                            frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                        &lt;/iframe>`;
+                    main.appendChild(trailerDIV);
+                } else {
+                    const trailerDIV = document.createElement("div");
+                    trailerDIV.className = "no-trailer-found";
+                    trailerDIV.innerHTML = `&lt;p>No trailers were found for &lt;strong>${visualTitle}&lt;/strong>&lt;/p>`;
+                    main.appendChild(trailerDIV);
+                    console.log("No YouTube-trailers were found!");
+                }
+
+            } catch (error) {
+                console.error(error);
+            }
+        } else {
+            const trailerDIV = document.createElement("div");
+            trailerDIV.className = "no-trailer-found";
+            trailerDIV.innerHTML = `&lt;p>No trailers were found for &lt;strong>${visualTitle}&lt;/strong>&lt;/p>`;
+            main.appendChild(trailerDIV);
+            console.log("No trailers were found!");
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/**
+ * Lägger till en flik för navigering mellan olika anime.
+ * @param {object} anime - ett objekt som beskriver en anime.
+ */
+function addTab(anime) {
+    if (sessionStorage.getItem("tabs")) {
+        const tabs = JSON.parse(sessionStorage.getItem("tabs"));
+        if (!tabs.some(tab => tab.mal_id === anime.mal_id)) {
+            tabs.push(anime);
+            renderTabs(tabs);
+            sessionStorage.setItem("tabs", JSON.stringify(tabs));
+        } else {
+            renderTabs(tabs, anime.mal_id);
+        }
+    } else {
+        const tabs = [anime];
+        renderTabs(tabs);
+        sessionStorage.setItem("tabs", JSON.stringify(tabs));
+    }
+}
+
+/**
+ * Lägger till alla flikar till dokumentet.
+ * @param {array} tabs - en array av anime för flikar.
+ */
+function renderTabs(tabs, malID) {
+    const tabsEL = [];
+    const homeTab = document.createElement("li");
+    tabsUL.innerHTML = "";
+    homeTab.id = "home-tab";
+    homeTab.textContent = "Home";
+    tabsEL.push(homeTab);
+    tabsUL.appendChild(homeTab);
+    
+    const tabcontent = {
+        pagetype: "home_page",
+        title: "Home"
+    };
+
+    homeTab.addEventListener("click", () => {
+
+        selectTab(tabsEL, homeTab, tabcontent);
+    });
+
+    if (tabs) {
+        tabs.forEach(tab => {
+            const tabLI = document.createElement("li");
+            tabLI.className = "tab selected";
+            const tabSPAN = document.createElement("span");
+            tabSPAN.textContent = tab.title;
+            const tabRemoveBTN = document.createElement("button");
+            tabRemoveBTN.innerHTML = `&lt;svg class=removetab-svg width="25px" height="25px" viewBox="0 0 36 36">
+        &lt;path d="M18,2A16,16,0,1,0,34,18,16,16,0,0,0,18,2Zm8,22.1a1.4,1.4,0,0,1-2,2l-6-6L12,26.12a1.4,1.4,0,1,1-2-2L16,18.08,9.83,11.86a1.4,1.4,0,1,1,2-2L18,16.1l6.17-6.17a1.4,1.4,0,1,1,2,2L20,18.08Z">&lt;/path>
+        &lt;/svg>`;
+            tabLI.addEventListener("click", () => {
+                selectTab(tabsEL, tabLI, tab);
+            });
+            tabRemoveBTN.addEventListener("click", (e) => {
+                removeTab(tab.mal_id);
+                e.stopPropagation(); // För att undvika att kalla selectTab två gånger.
+            });
+            tabsEL.push(tabLI);
+            if (tabsEL.indexOf(tabLI) !== -1) {
+                tabsEL[tabsEL.indexOf(tabLI)].className = "tab";
+            }
+            if (tab.mal_id === malID) {
+                selectTab(tabsEL, tabLI, tab);
+            }
+            tabLI.appendChild(tabSPAN);
+            tabLI.appendChild(tabRemoveBTN);
+            tabsUL.appendChild(tabLI);
+        });
+        if (!malID) {
+            selectTab(tabsEL, tabsEL[tabsEL.length - 1], tabs[tabs.length - 1]);
+        }
+    } else {
+        selectTab(tabsEL, homeTab, tabcontent);
+    }
+}
+
+/**
+ * Raderar en flik och sedan kallar renderTabs för att uppdatera.
+ * @param {number} malID - ett id för anime
+ */
+function removeTab(malID) {
+    if (sessionStorage.getItem("tabs")) {
+        const tabs = JSON.parse(sessionStorage.getItem("tabs"));
+        const remainingTabs = tabs.filter(tab => tab.mal_id !== malID);
+        sessionStorage.setItem("tabs", JSON.stringify(remainingTabs));
+        renderTabs(remainingTabs);
+    }
+}
+
+/**
+ * Hämtar fem stycken anime utefter det som söks i inputfältet.
+ * När de fem anime har hämtats kallas renderSearchResults.
+ */
+async function searchAnime() {
+    const query = searchField.value.trim();
+
+    if (!query) {
+        searchResults.innerHTML = "";
+    }
+
+    try {
+        const resp = await fetch(`https://api.jikan.moe/v4/anime?q=${query}&amp;limit=5`);
+        const data = await resp.json();
+        const animes = [];
+        data.data.forEach(anime => {
+            // console.log(anime);
+            let season = anime.season;
+            if (anime.season) {
+                season = anime.season.charAt(0).toUpperCase() + anime.season.slice(1);
+            }
+            animes.push({
+                pagetype: "anime_page",
+                title: anime.title_english || anime.title,
+                mal_id: anime.mal_id,
+                premiered: `${season || "?"} ${anime.year || "?"}`,
+                images: anime.images,
+                genres: anime.genres,
+                themes: anime.themes,
+                demo: anime.demographics,
+                licensors: anime.licensors,
+                producers: anime.producers,
+                studios: anime.studios,
+                source: anime.source,
+                synopsis: anime.synopsis,
+                score: anime.score,
+                rank: anime.rank,
+                type: anime.type,
+                rating: anime.rating,
+                aired: anime.aired,
+                episodes: anime.episodes,
+                originalTitle: anime.title
+            });
+        });
+
+        renderSearchResults(animes);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/**
+ * Uppdaterar listan med sökresultat efter den array som matas in.
+ * @param {array} animes - en array med anime sökresultat.
+ */
+function renderSearchResults(animes) {
+    searchResults.innerHTML = "";
+    animes.forEach(anime => {
+        const listItem = document.createElement("li");
+        listItem.tabIndex = 0;
+        listItem.innerHTML = `
+            &lt;picture class=search-image>
+                &lt;source srcset="${anime.images.webp.small_image_url}" type="image/webp">
+                &lt;img src="${anime.images.jpg.small_image_url}" width="46" height="65" alt="" loading="lazy" class=search-image>
+            &lt;/picture>
+            &lt;p class=search-title>${anime.title}&lt;/p>
+            &lt;p class=search-premiere>Premiered: ${anime.premiered}&lt;/p>
+        `;
+        listItem.addEventListener("click", () => {
+            listItem.blur();
+            searchField.value = "";
+            searchAnime();
+            addTab(anime);
+        });
+        searchResults.appendChild(listItem);
+    });
+}</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Global</h3><ul><li><a href="global.html#addTab">addTab</a></li><li><a href="global.html#moreInfoListItem">moreInfoListItem</a></li><li><a href="global.html#playTrack">playTrack</a></li><li><a href="global.html#removeTab">removeTab</a></li><li><a href="global.html#renderAnimeTrailer">renderAnimeTrailer</a></li><li><a href="global.html#renderPage">renderPage</a></li><li><a href="global.html#renderSearchResults">renderSearchResults</a></li><li><a href="global.html#renderTabs">renderTabs</a></li><li><a href="global.html#searchAnime">searchAnime</a></li><li><a href="global.html#selectTab">selectTab</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 4.0.4</a> on Wed Mar 12 2025 12:50:02 GMT+0100 (centraleuropeisk normaltid)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
