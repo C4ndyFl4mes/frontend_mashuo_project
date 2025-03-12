@@ -11,6 +11,14 @@ window.addEventListener("load", () => {
         const tabs = JSON.parse(sessionStorage.getItem("tabs"));
         renderTabs(tabs);
     }
+    // Hämta token från url.
+    const params = new URLSearchParams(window.location.hash.substring(1));
+    const accessToken = params.get("access_token");
+
+    if (accessToken) {
+        sessionStorage.setItem("spotify_access_token", accessToken);
+        window.location.href = "/";
+    }
 });
 
 searchField.addEventListener("input", () => {
@@ -19,7 +27,12 @@ searchField.addEventListener("input", () => {
 });
 
 
-
+/**
+ * Visuellt uppdaterar utseendet vid val av flik, samt kallar på renderPage(tab) för att visa flikens innehåll. 
+ * @param {array} tabsEL - en array av element.
+ * @param {HTMLElement} tabEL - elementet som är vald.
+ * @param {object} tab - information som ska visas på sidan.
+ */
 function selectTab(tabsEL, tabEL, tab) {
     tabsEL.forEach(tabEL => {
         tabEL.className = "tab";
@@ -30,7 +43,11 @@ function selectTab(tabsEL, tabEL, tab) {
     renderPage(tab);
 }
 
-function renderPage(tab) {
+/**
+ * Den bygger upp sidan utefter vilket sätt är lämpligast och så smidigt som möjligt. Därför använder funktionen både innerHTML och DOM-manipulation.
+ * @param {object} tab - information om den valda sidan.
+ */
+async function renderPage(tab) {
     const pageTitle = document.getElementById("page-title");
     const pageHeader = document.createElement("h1");
     pageTitle.textContent = tab.title;
@@ -60,10 +77,9 @@ function renderPage(tab) {
         <ul class=anime-extra-info-in-banner>
             <li><span>Rating</span> <strong>${tab.rating}</strong></li>
             <li><span>Aired</span> <strong>${tab.aired.string}</strong></li>
-        </ul>
+        </ul>`;
 
-        `;
-
+        // Lägger ihop tre arrayer till en gemensam array.
         const genThemeDemos = [];
         if (tab.genres) {
             tab.genres.forEach(genre => {
@@ -80,6 +96,8 @@ function renderPage(tab) {
                 genThemeDemos.push(demo.name);
             });
         }
+
+        // Lägger hela arrayen i en lista.
         const genresUL = document.createElement("ul");
         genresUL.className = "genres-list";
         genThemeDemos.forEach(gtd => {
@@ -88,15 +106,18 @@ function renderPage(tab) {
             gtdLI.innerHTML = `<strong>${gtd}</strong>`;
             genresUL.appendChild(gtdLI);
         });
+
         main.appendChild(animeBanner);
         main.appendChild(pageHeader);
         main.appendChild(genresUL);
 
+        // Beskrivningen.
         const descriptionARTICLE = document.createElement("article");
         descriptionARTICLE.className = "synopsis";
         descriptionARTICLE.innerHTML = `<h2>Synopsis</h2><p>${tab.synopsis}</p>`;
         main.appendChild(descriptionARTICLE);
 
+        // Mer informationslistan.
         const moreInfoUL = document.createElement("ul");
         moreInfoUL.className = "more-info-list";
 
@@ -106,20 +127,57 @@ function renderPage(tab) {
             <li class=show-on-mobile><span>Aired</span><strong>${tab.aired.string}</strong></li>
         `;
 
+        // Lägger in information som kan variera i längd.
         moreInfoUL.appendChild(moreInfoListItem("Studio", tab.studios));
         moreInfoUL.appendChild(moreInfoListItem("Licensor", tab.licensors));
         moreInfoUL.appendChild(moreInfoListItem("Producer", tab.producers));
 
-
-
         main.appendChild(moreInfoUL);
 
-        renderAnimeTrailer(tab.originalTitle, tab.title);
+        // Renderar en anime trailer ifall det finns en.
+        await renderAnimeTrailer(tab.originalTitle, tab.title);
+
+        // Kollar ifall användaren har loggat in med spotify.
+        if (sessionStorage.getItem("spotify_access_token")) {
+            const spotifyPlayerDIV = document.createElement("div");
+            spotifyPlayerDIV.id = "spotifyPlayer";
+            main.appendChild(spotifyPlayerDIV);
+            playTrack(tab.originalTitle); // Söker på orginal titel istället för den engelska för att öka chansen på att hitta relevant OP.
+        } else {
+            const authDIV = document.createElement("div");
+            authDIV.className = "auth-div";
+            authDIV.innerHTML = `<label for=auth-btn>You have to authenticate with Spotify to play OP</label>
+            <button id=auth-btn>Authenticate</button>`;
+            main.appendChild(authDIV);
+            document.getElementById("auth-btn").addEventListener('click', () => {
+                window.location.href = "/.netlify/functions/login"; // Startar authentiseringsprocessen.
+            });
+        }
     } else {
         main.appendChild(pageHeader);
 
     }
+}
 
+/**
+ * Hämtar och beddar in spotify spelaren efter den sökta titeln.
+ * @param {string} animeTitle - orginal titeln.
+ */
+async function playTrack(animeTitle) {
+    try {
+        const resp = await fetch(`https://api.spotify.com/v1/search?q=${animeTitle}&type=track`, {
+            headers: { Authorization: `Bearer ${sessionStorage.getItem('spotify_access_token')}` }
+        });
+        const data = await resp.json();
+        const track = data.tracks.items[0];
+
+        document.getElementById("spotifyPlayer").innerHTML = `
+        <h3>${track.name} - ${track.artists[0].name}</h3>
+        <iframe src="https://open.spotify.com/embed/track/${track.id}" width="300" height="80" frameborder="0" class=spotify-player allow="encrypted-media"></iframe>
+    `;
+    } catch (error) {
+        console.error(error);
+    }
 }
 
 /**
@@ -138,6 +196,8 @@ function moreInfoListItem(type, names) {
         for (let i = 0; i <= names.length - 1; i++) {
             if (i == 0) {
                 strong.textContent = names[i].name;
+            } else if (2 == names.length && i == names.length - 1) {
+                strong.textContent += ` and ${names[i].name}.`;
             } else if (i == names.length - 1) {
                 strong.textContent += `, and ${names[i].name}.`;
             } else {
@@ -156,26 +216,35 @@ function moreInfoListItem(type, names) {
     return li;
 }
 
+/**
+ * Hämtar och laddar upp beddar in YouTube trailer efter sökt titel.
+ * @param {string} title - original titeln.
+ * @param {string} visualTitle - engelska titeln.
+ */
 async function renderAnimeTrailer(title, visualTitle) {
     try {
         console.log(title);
         const resp = await fetch(`https://api.themoviedb.org/3/search/tv?api_key=${process.env.THE_MOVIE_DATABASE}&query=${encodeURIComponent(title)}`)
         const searchData = await resp.json();
 
+        // Kollar ifall titeln finns.
         if (searchData.results.length > 0) {
             const firstResultID = searchData.results[0].id;
+            // Om det gör det hämtas video trailers av den och filterars efter att vara trailer på YouTube.
             try {
                 const videoResp = await fetch(`https://api.themoviedb.org/3/tv/${firstResultID}/videos?api_key=${process.env.THE_MOVIE_DATABASE}`)
                 const videoData = await videoResp.json();
                 const youtubeTrailers = videoData.results.filter(video => video.site === "YouTube" && video.type === "Trailer");
                 console.log(youtubeTrailers);
+                // Kolla ifall det finns trailers.
                 if (youtubeTrailers.length > 0) {
+                    // Om det gör det beddas den in på sidan, med rubriken på engelska.
                     const youtubeTrailer = youtubeTrailers[0].key;
                     const trailerDIV = document.createElement("div");
                     trailerDIV.className = "trailer-div";
                     trailerDIV.innerHTML = `
                         <h2>${visualTitle} - Trailer</h2>
-                        <iframe width="1000" height="562.5" class=youtube-trailer
+                        <iframe width="1000" height="563" class=youtube-trailer
                             src="https://www.youtube.com/embed/${youtubeTrailer}"
                             frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
                         </iframe>`;
@@ -236,14 +305,17 @@ function renderTabs(tabs, malID) {
     homeTab.textContent = "Home";
     tabsEL.push(homeTab);
     tabsUL.appendChild(homeTab);
+    
     const tabcontent = {
         pagetype: "home_page",
         title: "Home"
     };
+
     homeTab.addEventListener("click", () => {
 
         selectTab(tabsEL, homeTab, tabcontent);
     });
+
     if (tabs) {
         tabs.forEach(tab => {
             const tabLI = document.createElement("li");
@@ -279,6 +351,7 @@ function renderTabs(tabs, malID) {
         selectTab(tabsEL, homeTab, tabcontent);
     }
 }
+
 /**
  * Raderar en flik och sedan kallar renderTabs för att uppdatera.
  * @param {number} malID - ett id för anime

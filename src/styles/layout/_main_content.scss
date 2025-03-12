@@ -129,6 +129,39 @@ main {
     background-color: red;
     text-align: center;
 }
+.auth-div {
+    height: 5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    background-color: var(--secondary-bg-color);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    button {
+        font-size: 1.2rem;
+        height: 2.4rem;
+        color: var(--primary-fg-color);
+        background-color: var(--primary-bg-color);
+    }
+    button:hover {
+        filter: brightness(80%);
+    }
+    button:active {
+        filter: brightness(70%);
+    }
+
+}
+#spotifyPlayer {
+    margin-top: 1rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    background-color: var(--secondary-bg-color);
+}
+.spotify-player {
+    width: 100%;
+}
 @media screen and (max-width: 500px) {
     main {
         width: 100%;
