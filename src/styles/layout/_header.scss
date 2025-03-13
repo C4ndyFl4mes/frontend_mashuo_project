@@ -9,23 +9,29 @@ header {
     margin-bottom: 5rem;
 }
 
+// The top is the first child of header, contains only the search field and such, not the tabs.
 .top {
     background-color: var(--secondary-bg-color);
 }
 
+// The nav is the second child of header.
 nav {
+    // Tab list.
     ul {
         padding: 0;
         margin: 0;
         list-style: none;
         display: flex;
         flex-wrap: wrap;
-        // width: 100%;
         width: fit-content;
     }
+
+    // Gives the last tab a border radius.
     ul>li:last-child {
         border-bottom-right-radius: 10px;
     }
+
+    // Tab.
     li {
         background-color: var(--secondary-bg-color);
         padding-left: 1rem;
@@ -39,24 +45,33 @@ nav {
         align-items: center;
         filter: brightness(80%)
     }
+
+    // Tab effects.
     li:hover {
         filter: brightness(95%);
     }
+
     li:active {
         filter: brightness(90%);
     }
 }
+
+// The home tab, always visible. Cannot be removed.
 #home-tab {
     border-top: 5px solid var(--secondary-bg-color);
     padding-right: 2rem;
-
 }
+
 .tab {
     padding-right: 0;
 }
+
+// The styling if the tab is selected.
 .selected {
     filter: brightness(100%);
 }
+
+// The image of the button.
 .removetab-svg {
     cursor: pointer;
 }
@@ -70,11 +85,13 @@ nav {
     fill: red;
 }
 
+// The button is set to transparent. Making the svg the only thing visible.
 .tab>button {
     background-color: transparent;
     border: 0;
 }
 
+// The box that contains the search.
 .search-box {
     width: 90%;
     max-width: 400px;
@@ -90,15 +107,16 @@ nav {
     z-index: 2;
 }
 
+// The popup container.
 .search-popup {
     position: relative;
     width: fit-content;
     height: fit-content;
 
     margin: 0 auto;
-    // border: 1px solid;
 }
 
+// The searchfield itself.
 #search-field {
     width: inherit;
     border-radius: 5px;
@@ -108,6 +126,7 @@ nav {
     @extend %search-typography;
 }
 
+// The popup itself containing a list of search results.
 .search-results-grid-dropdown {
     position: absolute;
 
@@ -118,12 +137,14 @@ nav {
     transition: grid-template-rows 0.4s ease-in-out;
 }
 
+// To make sure the popup gets expanded while the searchfield is focused or if a search result is focused (mainly for keyboard navigation).
 #search-field:focus + .search-results-grid-dropdown,
 .search-results-grid-dropdown:has(#search-results > li:focus) {
     grid-template-rows: 1fr;
     z-index: 5;
 }
 
+// The search result list.
 #search-results {
     position: relative;
     overflow: hidden;
@@ -137,6 +158,7 @@ nav {
     margin: 0;
     padding: 0;
 
+    // A search result item.
     li {
         width: inherit;
         border-bottom: 1px solid;
@@ -148,27 +170,33 @@ nav {
         column-gap: 1rem;
         transition: 0.2s filter;
     }
+
     li:hover {
         filter: brightness(110%);
     }
+
     p {
         margin: 0;
         padding: 0;
         font-size: 0.8rem;
     }
+
     .search-image {
         float: left;
         margin-right: 0.5rem;
     }
+
     .search-title {
         font-weight: 700;
         
     }
+
     .search-premiere {
         grid-area: 2/2/3/3;
     }
 }
 
+// The frame of the hero image.
 .header-image-frame {
     margin: 0 auto;
     max-width: 1000px;
@@ -176,12 +204,15 @@ nav {
     border-bottom: 0;
     background-color: var(--secondary-bg-color);
 }
+
+// The hero image of the website.
 .header-image {
     width: 100%;
     height: 100%;
 }
 
 @media screen and (max-width: 500px) {
+    // Changes the layout from row to column in the tabs.
     nav>ul {
         flex-direction: column;
         li {
@@ -192,16 +223,15 @@ nav {
         }
         width: 100%;
     }
+
     .search-box {
         width: 100%;
     }
-    // .search-popup {
-    //     min-width: 80vw;
 
-    // }
     #search-field {
         min-width: auto;
     }
+
     .header-image-frame {
         border-left: 0;
         border-right: 0;

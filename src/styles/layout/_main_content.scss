@@ -7,30 +7,39 @@ main {
     width: 97%;
     max-width: 1000px;
     background-color: var(--anime-info-banner-bg-color);
-    padding-top: 1rem;
-    // padding: 1rem;
-    // padding-right: 0;
+    padding-top: var.$main-padding;
+
     margin: 0 auto;
     display: flex;
     flex-direction: column;
 
     border: 5px solid var(--secondary-bg-color);
     @extend %main-typography;
-    h1 {
-        padding-left: 1rem;
-        font-size: 1.7rem;
-        line-height: 2rem;
-    }
+    
 }
 
+h1 {
+    padding-left: var.$main-padding;
+    font-size: 1.7rem;
+    line-height: 2rem;
+}
+
+h2 {
+    font-size: 1.4rem;
+    line-height: 1.8rem;
+    margin-bottom: 0.3rem;
+}
+
+// Page banner for the anime.
 .anime-banner {
     height: fit-content;
-    padding-left: 1rem;
+    padding-left: var.$main-padding;
     display: grid;
     grid-template-columns: auto auto;
     grid-template-rows: auto auto;
 }
 
+// The poster image of the anime.
 .page-image {
     width: 100%;
     max-width: 225px;
@@ -40,6 +49,7 @@ main {
     float: left;
 }
 
+// Many lists extends this whitin this file. 
 %list {
     align-self: center;
     list-style: none;
@@ -50,35 +60,34 @@ main {
     flex-wrap: wrap;
 }
 
+// The two lists in the page banner.
 .anime-info-in-banner,
 .anime-extra-info-in-banner {
     @extend %list;
     justify-content: space-evenly;
     li {
         flex: 1;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: var.$main-padding;
+        padding-right: var.$main-padding;
         text-align: center;
         display: flex;
         flex-direction: column;
     }
 }
 
+// The description.
 .synopsis {
     font-size: 1.2rem;
     line-height: 1.5rem;
-    padding: 1rem;
-    h2 {
-        font-size: 1.4rem;
-        line-height: 1.8rem;
-        margin-bottom: 0.3rem;
-    }
+    padding: var.$main-padding;
+    
     p {
         margin-top: 0;
         text-align: justify;
     }
 }
 
+// The list that contains genres, demographics, and themes.
 .genres-list {
     width: 100%;
     @extend %list;
@@ -89,12 +98,13 @@ main {
 
     li {
         flex: 1;
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: var.$main-padding;
+        padding-right: var.$main-padding;
         text-align: center;
     }
 }
 
+// The extra information outside of the page banner.
 .more-info-list {
     width: 100%;
     @extend %list;
@@ -102,8 +112,8 @@ main {
     justify-content: space-between;
     row-gap: 1rem;
     li {
-        padding-left: 1rem;
-        padding-right: 1rem;
+        padding-left: var.$main-padding;
+        padding-right: var.$main-padding;
         display: flex;
         flex-direction: column;
     }
@@ -111,12 +121,14 @@ main {
         display: none;
     }
 }
+
+// Trailer
 .trailer-div {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: var.$main-padding;
+    padding-right: var.$main-padding;
 }
 .youtube-trailer {
     aspect-ratio: 560/315;
@@ -129,6 +141,8 @@ main {
     background-color: red;
     text-align: center;
 }
+
+// Spotify Player
 .auth-div {
     height: 5rem;
     margin-top: 1rem;
@@ -147,23 +161,44 @@ main {
         cursor: pointer;
         transition: 0.3s;
     }
+
     button:hover {
         filter: brightness(80%);
     }
+
     button:active {
         filter: brightness(70%);
     }
 
 }
+
 #spotifyPlayer {
     margin-top: 1rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: var.$main-padding;
+    padding-right: var.$main-padding;
     background-color: var(--secondary-bg-color);
 }
+
 .spotify-player {
     width: 100%;
 }
+
+// The articles at the home page.
+.home-articles {
+    padding-left: var.$main-padding;
+    padding-right: var.$main-padding;
+    text-align: justify;
+    h2 {
+        margin-bottom: 0;
+    }
+    p {
+        margin-top: 0.2rem;
+    }
+}
+.home-articles:last-child {
+    margin-bottom: 7rem;
+}
+
 @media screen and (max-width: 500px) {
     main {
         width: 100%;

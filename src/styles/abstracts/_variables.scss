@@ -26,7 +26,8 @@ $dath-search-item-bg-color: color.adjust($dath-secondary-bg-color, $lightness: -
 $dath-anime-info-banner-bg-color: #2D2D2D;
 // ...
 
-
+// Layout
+$main-padding: 1rem;
 
 $link-normal-color: #00f;
 $link-active-color: color.adjust($link-normal-color, $lightness: -15%);

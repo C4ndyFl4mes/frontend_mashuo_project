@@ -155,7 +155,22 @@ async function renderPage(tab) {
         }
     } else {
         main.appendChild(pageHeader);
-
+        const noticeARTICLE = document.createElement("article");
+        noticeARTICLE.className = "home-articles";
+        noticeARTICLE.innerHTML = `
+            <h2>Notice</h2>
+            <p>When you have authenticated to Spotify (authentication button will appear on searched animes), the access token will be stored in sessionStorage. Sadly, I didn't come up with a solution to automatically remove the token from sessionStorage after one hour when it's no longer usable and needs to be renewed.
+            Therefore one must manually remove the sessionStorage variable or open a new tab and authenticate again. To remove this "app" from trusted apps from Spotify, go profile > account > manage apps. Do this after you've tested my website.</p>
+        `;
+        main.appendChild(noticeARTICLE);
+        const aboutARTICLE = document.createElement("article");
+        aboutARTICLE.className = "home-articles";
+        aboutARTICLE.innerHTML = `
+            <h2>About</h2>
+            <p>This website uses three APIs, Jikan, The Movie DB, and Spotify Web API to put together relevant information about a certain anime. Though, sometimes, the Spotify Web API retrieves music that's irrelevant to the anime that's searched for.
+            The main function of this website is to provide infromation (Jikan API), a trailer (The Movie DB), and the theme opening song (Spotify Web API) for that anime.</p>
+        `;
+        main.appendChild(aboutARTICLE);
     }
 }
 
